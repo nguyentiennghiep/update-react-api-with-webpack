@@ -13,7 +13,6 @@ class Products extends Component {
                         <thead>
                             <tr>
                                 <th>Nuber</th>
-                                <th>Code</th>
                                 <th>Name</th>
                                 <th>Price</th>
                                 <th>Status</th>

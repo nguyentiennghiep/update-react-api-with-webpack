@@ -3,7 +3,9 @@ import './App.css';
 import Menu from './../Menu/Menu';
 import routes from './../../routes';
 import { Switch, Route, HashRouter } from 'react-router-dom';
-
+import { graphql } from 'react-apollo';
+import ListProducts from '../../aws/queries/ListProducts';
+import { Query } from "react-apollo";
 
 class App extends Component {
 
@@ -33,3 +35,15 @@ class App extends Component {
 }
 
 export default App;
+
+
+// export default graphql(ListProducts, {
+//       options: {
+//         fetchPolicy: 'cache-and-network'
+//       },
+//       props: props => ({
+//         _products: props.data.listProducts ? props.data.listProducts.items : [],
+//       })
+//     })(App);
+
+

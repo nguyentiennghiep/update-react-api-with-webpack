@@ -19,7 +19,6 @@ class Product extends Component {
         return (
             <tr>
                 <td>{this.props.index + 1}</td>
-                <td>{product.id}</td>
                 <td>{product.name}</td>
                 <td>{product.price}</td>
                 <td>

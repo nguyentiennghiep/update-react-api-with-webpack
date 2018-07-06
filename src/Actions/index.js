@@ -1,13 +1,13 @@
 import * as types from './../Contants/ActionsType';
 import callApi from '../utils/apiCaller';
 
-export const fetchRequest = () =>{
-    return (dispatch) => {
-        return callApi('products','GET',null).then(res => {
-            dispatch(fetchProducts(res.data))
-        })
-    }
-}
+// export const fetchRequest = () =>{
+//     return (dispatch) => {
+//         return callApi('products','GET',null).then(res => {
+//             dispatch(fetchProducts(res.data))
+//         })
+//     }
+// }
 
 export const fetchProducts = (products) =>{
     return {
@@ -32,13 +32,13 @@ export const deleteProduct = (product) => {
     };
 }
 
-export const addProductRequest = (product) =>{
-    return (dispatch) => {
-        return callApi('products','POST',product).then(res =>{
-            dispatch(addProduct(res.data))
-        });
-    };
-}
+// export const addProductRequest = (product) =>{
+//     return (dispatch) => {
+//         return callApi('products','POST',product).then(res =>{
+//             dispatch(addProduct(res.data))
+//         });
+//     };
+// }
 
 export const addProduct = (product) => {
     return {
