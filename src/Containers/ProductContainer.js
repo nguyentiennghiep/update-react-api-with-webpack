@@ -3,8 +3,9 @@ import { connect } from 'react-redux';
 import Products from './../Components/ProductList/Products';
 import Product from './../Components/ProductItem/Product';
 import * as actions from './../Actions/index';
-import { graphql } from 'react-apollo';
+import { graphql, compose } from 'react-apollo';
 import ListProducts from '../aws/queries/ListProducts';
+import DeleteProduct from '../aws/mutations/DeleteProduct'
 
 class ProductContainer extends Component {
 
@@ -30,8 +31,8 @@ class ProductContainer extends Component {
     }
 
     onDelete = (data) => {
-        this.props.deleteProduct(data);
-
+        this.props.deleteProductLocal(data);
+        this.props.onDeleteProduct(data);
     }
 
     onUpdate = (product) => {
@@ -61,8 +62,8 @@ const mapDispatchToProps = (dispatch, props) => {
         fetchRequest: (products) => {
             dispatch(actions.fetchProducts(products))
         },
-        deleteProduct: (product) => {
-            dispatch(actions.deleteProductRequest(product))
+        deleteProductLocal: (product) => {
+            dispatch(actions.deleteProduct(product))
         },
         updateProduct: (product) => {
             dispatch(actions.onUpdate(product))
@@ -70,13 +71,34 @@ const mapDispatchToProps = (dispatch, props) => {
     }
 }
 
-const ProductContainerWithAWSData = graphql(ListProducts, {
-    options: {
-      fetchPolicy: 'cache-and-network'
-    },
-    props: props => ({
-      _products: props.data.listProducts ? props.data.listProducts.items : [],
-    })
-  })(ProductContainer);
+const ProductContainerWithAWSData = compose(
+    graphql(ListProducts, {
+        options: {
+            fetchPolicy: 'cache-and-network'
+        },
+        props: props => ({
+            _products: props.data.listProducts ? props.data.listProducts.items : [],
+        })
+    }),
+    graphql(DeleteProduct, {
+        props: props => ({
+            onDeleteProduct: (product) => props.mutate({
+                variables: {id : product.id},
+                optimisticResponse: () => ({ deleteProduct: { ...product, __typename: 'Product' } }),
+            })
+        }),
+        options: {
+            refetchQueries: [{ query: ListProducts }],
+            update: (proxy, { data: { deleteProduct: { id } } }) => {
+                const query = ListProducts;
+                const data = proxy.readQuery({ query });
+                data.listProducts.items = data.listProducts.items.filter(product => product.id !== id);
+                proxy.writeQuery({ query, data });
+            }
+        }
+    }),
+
+)(ProductContainer);
+
 
 export default connect(mapStateToProps, mapDispatchToProps)(ProductContainerWithAWSData);

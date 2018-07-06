@@ -5,13 +5,20 @@ import ProductActionPage from '../Pages/ProductActionPage/ProductActionPage';
 import uuidV4 from 'uuid/v4';
 import CreateProduct from './../aws/mutations/CreateProduct';
 import ListProducts from '../aws/queries/ListProducts';
-import { graphql } from 'react-apollo';
+import UpdateProduct from '../aws/mutations/UpdateProduct';
+import { graphql, compose } from 'react-apollo';
 
 class ProductActionContainer extends Component {
 
     onSubmit = (product) => {
         if (product.id) {
             this.props.updateProductLocal(product);
+            this.props.onEdit({
+                id :product.id,
+                name: product.name,
+                price: product.price,
+                status: product.status
+            })
         }
         else {
             this.props.addProductRequest(product);
@@ -20,7 +27,7 @@ class ProductActionContainer extends Component {
                 name: product.name,
                 price: product.price,
                 status: product.status
-              })
+            })
         }
     }
 
@@ -45,27 +52,49 @@ const mapDispatchToProps = (dispatch, props) => {
             dispatch(actions.addProduct(product))
         },
         updateProductLocal: (product) => {
-            dispatch(actions.onUpdateRequest(product))
+            dispatch(actions.onUpdateLocal(product))
         }
     }
 }
 
-const ProductActionContainerWithAWSData = graphql(CreateProduct, {
+const ProductActionContainerWithAWSData = compose(graphql(CreateProduct, {
     props: props => ({
-      onAdd: product => props.mutate({
-        variables: product,
-        optimisticResponse: {
-          __typename: 'Mutation',
-          createProduct: { ...product,  __typename: 'Product' }
-        },
-        update: (proxy, { data: { createProduct } }) => {
-          const data = proxy.readQuery({ query: ListProducts });
-          data.listProducts.items.push(createProduct);
-          proxy.writeQuery({ query: ListProducts, data });
-        }
-      })
+        onAdd: product => props.mutate({
+            variables: product,
+            optimisticResponse: {
+                __typename: 'Mutation',
+                createProduct: { ...product, __typename: 'Product' }
+            },
+            update: (proxy, { data: { createProduct } }) => {
+                const data = proxy.readQuery({ query: ListProducts });
+                data.listProducts.items.push(createProduct);
+                proxy.writeQuery({ query: ListProducts, data });
+            }
+        })
     })
-  })(ProductActionContainer)
-  
+}),
+    graphql(UpdateProduct, {
+        props: (props) => ({
+            onEdit: (product) => {
+                props.mutate({
+                    variables: {...product},
+                    optimisticResponse: () => ({ updateProduct: { ...product, __typename: 'Product'} }),
+                })
+            }
+        }),
+        options: {
+            refetchQueries: [{ query: ListProducts }],
+            update: (dataProxy, { data: { updateProduct } }) => {
+                const query = ListProducts;
+                const data = dataProxy.readQuery({ query });
+
+                data.listProducts.items = data.listProducts.items.map(Product => Product.id !== updateProduct.id ? Product : { ...updateProduct });
+
+                dataProxy.writeQuery({ query, data });
+            }
+        }
+    })
+)(ProductActionContainer)
+
 
 export default connect(mapStateToProps, mapDispatchToProps)(ProductActionContainerWithAWSData);

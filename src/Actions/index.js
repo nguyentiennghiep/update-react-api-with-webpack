@@ -17,13 +17,13 @@ export const fetchProducts = (products) =>{
 }
 
 
-export const deleteProductRequest = (product) =>{
-    return (dispatch) => {
-        return callApi(`products/${product.id}`,'DELETE',null).then(res =>{
-            dispatch(deleteProduct(product))
-        })
-    }
-}
+// export const deleteProductRequest = (product) =>{
+//     return (dispatch) => {
+//         return callApi(`products/${product.id}`,'DELETE',null).then(res =>{
+//             dispatch(deleteProduct(product))
+//         })
+//     }
+// }
 
 export const deleteProduct = (product) => {
     return {
@@ -47,13 +47,13 @@ export const addProduct = (product) => {
     }
 }
 
-export const onUpdateRequest = (product) =>{
-    return (dispatch) =>{
-        return callApi(`products/${product.id}`,'PUT',product).then(res =>{
-            dispatch(onUpdateLocal(res.data));
-        })
-    }
-}
+// export const onUpdateRequest = (product) =>{
+//     return (dispatch) =>{
+//         return callApi(`products/${product.id}`,'PUT',product).then(res =>{
+//             dispatch(onUpdateLocal(res.data));
+//         })
+//     }
+// }
 
 export const onUpdateLocal = (product) => {
     return {
