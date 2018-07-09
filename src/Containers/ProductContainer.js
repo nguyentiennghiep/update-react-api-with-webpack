@@ -6,8 +6,13 @@ import * as actions from './../Actions/index';
 import { graphql, compose } from 'react-apollo';
 import ListProducts from '../aws/queries/ListProducts';
 import DeleteProduct from '../aws/mutations/DeleteProduct'
+import NewProductSubscription from './../aws/subscriptions/NewProductSubscription';
 
 class ProductContainer extends Component {
+
+    componentWillMount() {
+        this.props.subscribeToNewProduct();
+    }
 
     componentDidMount() {
         this.props.fetchRequest(this.props._products);
@@ -78,12 +83,22 @@ const ProductContainerWithAWSData = compose(
         },
         props: props => ({
             _products: props.data.listProducts ? props.data.listProducts.items : [],
+            // START - NEW PROP :
+            subscribeToNewProduct: params => {
+                props.data.subscribeToMore({
+                    document: NewProductSubscription,
+                    updateQuery: (prev, { subscriptionData: { data : { onCreateProduct } } }) => ({
+                        ...prev,
+                        listProducts: { items: [onCreateProduct, ...prev.listProducts.items.filter(product => product.id !== onCreateProduct.id)], __typename: 'ProductConnection' }
+                    })
+                });
+            },
         })
     }),
     graphql(DeleteProduct, {
         props: props => ({
             onDeleteProduct: (product) => props.mutate({
-                variables: {id : product.id},
+                variables: { id: product.id },
                 optimisticResponse: () => ({ deleteProduct: { ...product, __typename: 'Product' } }),
             })
         }),
