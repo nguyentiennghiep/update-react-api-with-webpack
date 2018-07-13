@@ -2,4 +2,8 @@
 
 Run Project 
 
-npm run -serve
+npm install
+
+npm run build
+
+nodemon .\src\server.js

@@ -4,13 +4,13 @@ class HomePage extends Component {
     render() {
         return (
             <div>
-                <form>
+                <form method="post">
                     <legend>Login</legend>
 
                     <div class="row">
                         <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
                             <div className="form-group">
-                                <label for="">UserName</label>
+                                <label for="">User Name</label>
                                 <input type="text" className="form-control" placeholder="Input field" name ="username"/>
                             </div>
                         </div>
@@ -23,7 +23,7 @@ class HomePage extends Component {
                             </div>
                         </div>
                     </div>
-                    <button type="submit" className="btn btn-primary">Submit</button>
+                    <input type="submit" className="btn btn-primary" value="login"/>
                 </form>
             </div>
         );
